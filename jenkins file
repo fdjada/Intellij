@@ -1,0 +1,29 @@
+pipeline {
+        agent any
+
+        stages {
+                stage ('build') {
+
+                                steps{
+                                        withMaven (maven: 'maven_3_6_3'){
+                                               sh 'mvn clean  package'
+                                        }
+                                }
+                }
+
+                stage {
+                    steps {
+                        withCredentials ([[
+                                   $class       : 'UserNamePasswordMultiBinding'
+                                   credentialsId: 'djada'
+                                   usernameVariable:'USERNAME',
+                                   passwordVariable: 'PASSWORD'
+                        ]]){
+                            sh ' -i "ops-aws-key.pem"centos@ec2-13-36-39-148.eu-west-3.compute.amazonaws.com'
+                            sh 'push'
+                        }
+
+                        }
+                }
+        }
+       }
